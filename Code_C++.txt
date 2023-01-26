@@ -1,0 +1,320 @@
+#include <iostream>
+#include <cmath>
+
+using namespace std;
+// seq contains all the initial sequences
+int seq[300000][15];
+int randuri=0;
+/* A utility function that prints a given arr[] of length size*/
+void printArray(int arr[], int size)
+{
+    for(int i = 0; i < size; i++)
+    {
+        //cout <<" "<< arr[i];
+        seq[randuri][i]=arr[i];
+    }
+    //cout <<"\n";
+    randuri++;
+    return;
+}
+
+/* This function returns 0 if there are no more sequences to be printed, otherwise
+   modifies arr[] so that arr[] contains next sequence to be printed */
+int getSuccessor(int arr[], int k, int n)
+{
+    /* start from the rightmost side and find the first number less than n */
+    int p = k - 1;
+    while (arr[p] == n)
+        p--;
+
+    /* If all numbers are n in the array then there is no successor, return 0 */
+    if (p < 0)
+        return 0;
+
+    /* Update arr[] so that it contains successor */
+    arr[p] = arr[p] + 1;
+    for(int i = p + 1; i < k; i++)
+        arr[i] = 1;
+
+    return 1;
+}
+
+/* The main function that prints all sequences from 1, 1, ..1 to n, n, ..n */
+void printSequences(int n, int k)
+{
+    int *arr = new int[k];
+
+    /* Initialize the current sequence as the first sequence to be printed */
+    for(int i = 0; i < k; i++)
+        arr[i] = 1;
+
+    /* The loop breaks when there are no more successors to be printed */
+    while(1)
+    {
+        /* Print the current sequence */
+        printArray(arr, k);
+
+        /* Update arr[] so that it contains next sequence to be printed. And if
+           there are no more sequences then break the loop */
+        if(getSuccessor(arr, k, n) == 0)
+            break;
+    }
+
+    delete(arr); // free dynamically allocated array
+    return;
+}
+
+
+int main()
+{
+    int x,y,z;
+    int valabile;
+ // x,y,z are the coordinates for the x*y*z grid
+    cin >> x >> y >>z;
+    int n = 3;
+// k is the number of steps that will take the robots to meet if they do 
+    int k = (x+y+z)/2;
+    printSequences(n, k);
+    cout << endl << endl;
+    int secvmax=1;
+    for(int i = 0; i < k; i++)
+    {
+        secvmax*=3;
+    }
+// secvmax is the total  number of possible sequences (1111...11 to 3333...33)
+    cout << secvmax << endl;
+    for(int i = 0; i <secvmax; i++)
+    {
+        //cout << endl;
+        for(int j=0; j<k; j++)
+        {
+            //cout << seq[i][j] << " ";
+        }
+    }
+// valabile will be number of sequences that describe valid movements of the robots 
+// neval will be the number of invalid sequences
+    valabile=secvmax;
+    int neval = 0;
+    int a = 0;
+    int b = 0;
+    int c = 0;
+
+    for(int i = 0; i < secvmax; i++)
+    {
+
+        for(int j = 0; j < k; j++)
+        {
+            if(seq[i][j]==1)
+            {
+                a++;
+            }
+            if(seq[i][j]==2)
+            {
+                b++;
+            }
+            if(seq[i][j]==3)
+            {
+                c++;
+            }
+        }
+        if(a>x || b>y || c>z)
+        {
+            for(int j = 0; j < k; j++)
+            {
+                seq[i][j]=0;
+            }
+            neval++;
+        }
+        a=0;
+        b=0;
+        c=0;
+    }
+    valabile-=neval;
+    cout << endl;
+    cout << "The number of valid sequences: ";
+    cout << valabile;
+    cout << endl;
+//seq2 will only store the remaining valid sequences
+    int seq2[valabile][k];
+    int t = 0;
+    for(int i = 0; i <secvmax; i++)
+    {
+        if(seq[i][0]!=0)
+        {
+            for(int j=0; j<k; j++)
+            {
+                seq2[t][j]=seq[i][j];
+            }
+            t++;
+        }
+    }
+     
+    
+    cout << endl;
+//seqcord will contain the final coordinates associated with each sequence
+//seqprob will contain all the probabilities for each sequence
+//seqprobfin will contain every probability for every final set of coordinates
+    double seqprob[t];
+    double p = 1;
+    a=0;
+    b=0;
+    c=0;
+    for(int i = 0; i < t; i++)
+    {
+        p=1;
+        int maxime=0;
+        a=0;
+        b=0;
+        c=0;
+        for(int j = 0; j < k; j++)
+        {
+            if(x==0 && j==0)
+            {
+                maxime++;
+            }
+            if(y==0 && j==0)
+            {
+                maxime++;
+            }
+            if(z==0 && j==0)
+            {
+                maxime++;
+            }
+            if (maxime == 0)
+            {
+                p*=1/3.0;
+            }
+            else if (maxime == 1)
+            {
+                p*=1/2.0;
+            }
+
+            if(seq2[i][j]==1)
+            {
+
+                a++;
+
+            }
+            if(seq2[i][j]==2)
+            {
+
+                b++;
+            }
+            if(seq2[i][j]==3)
+            {
+
+                c++;
+            }
+            if(seq2[i][j]==1)
+            {
+                if(a==x)
+                {
+                    maxime++;
+                }
+            }
+            if(seq2[i][j]==2)
+            {
+                if(b==y)
+                {
+                    maxime++;
+                }
+
+            }
+            if(seq2[i][j]==3)
+            {
+                if(c==z)
+                {
+                    maxime++;
+                }
+
+            }
+
+        }
+        seqprob[i]=p;
+    }
+    cout << endl;
+     
+    
+    a=0;
+    b=0;
+    c=0;
+    double cordprob[t];
+    int seqcord[t][3];
+    int coord=0;
+    bool este;
+    for(int i=0; i<t; i++)
+    {
+        este = 0;
+        a=0;
+        b=0;
+        c=0;
+        for(int j=0; j<k; j++)
+        {
+            if(seq2[i][j]==1)
+            {
+                a++;
+            }
+            if(seq2[i][j]==2)
+            {
+                b++;
+            }
+            if(seq2[i][j]==3)
+            {
+                c++;
+            }
+        }
+        if(coord!=0)
+        {
+            for(int n = 0; n < coord; n++)
+            {
+                if(seqcord[n][0]==a && seqcord[n][1]==b && seqcord[n][2]==c && este == 0)
+                {
+                    cordprob[n]+=seqprob[i];
+                    este=1;
+                }}
+                if(este==0)
+                {
+                    seqcord[coord][0]=a;
+                    seqcord[coord][1]=b;
+                    seqcord[coord][2]=c;
+                    cordprob[coord]=seqprob[i];
+                    coord++;
+                }
+
+        }
+        else
+        {
+            seqcord[0][0]=a;
+            seqcord[0][1]=b;
+            seqcord[0][2]=c;
+            cordprob[0]=seqprob[0];
+            coord++;
+        }
+    }
+
+    
+    cout << endl << "The coordinates with their corresponding probabilities are: " << endl;
+    for(int i = 0; i < coord; i++)
+    {
+        for(int j = 0; j < 3; j++)
+        {
+            cout << seqcord[i][j] << " ";
+        }
+        cout << cordprob[i];
+        cout << endl;
+    }
+    cout << coord;
+    cout << endl;
+    //pfinal is the probability that the robots will meet
+    double pfinal=0;
+    for(int i = 0; i<coord; i++){
+        pfinal+=cordprob[i]*cordprob[coord-i-1];
+    }
+
+    cout << "The final probability is: " << 100*pfinal << "%" ;
+    
+    /* ! The lines from 8 to 65 are taken from https://www.geeksforgeeks.org/print-all-sequences-of-given-length/ and are
+    used to generate all the possible sequences (11...11 to 33...33) !
+    */
+    return 0;
+}
